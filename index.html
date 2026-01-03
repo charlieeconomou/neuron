@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neuron — Learning-First AI for Programming Courses</title>
+  <meta name="description" content="Neuron is learning-first, policy-driven AI for programming education—built for instructor control and student understanding." />
+
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#070b22;
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --muted2: rgba(255,255,255,0.55);
+      --accent: rgba(131, 95, 255, 1);
+      --accent2: rgba(58, 142, 230, 1);
+      --shadow: 0 18px 60px rgba(0,0,0,0.55);
+      --radius: 18px;
+      --radius2: 24px;
+      --max: 1100px;
+    }
+
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 70% 10%, rgba(131,95,255,0.32), transparent 60%),
+        radial-gradient(900px 600px at 20% 40%, rgba(58,142,230,0.20), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 55%, #060717);
+      overflow-x:hidden;
+    }
+
+    /* subtle grain */
+    body:before{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+      opacity:.18;
+      transform: rotate(6deg);
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    .wrap{ max-width: var(--max); margin:0 auto; padding: 0 22px; position:relative; }
+
+    /* NAV */
+    .nav{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(16px);
+      background: rgba(5,6,10,0.42);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding: 14px 0;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      font-weight: 900;
+      letter-spacing: 0.2px;
+    }
+    .logo{
+      width:38px; height:38px; border-radius: 12px;
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,0.35), transparent 60%),
+        linear-gradient(135deg, rgba(58,142,230,0.95), rgba(131,95,255,0.95));
+      box-shadow: 0 10px 22px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .nav-links{
+      display:flex; align-items:center; gap:10px;
+      color: var(--muted);
+      font-weight: 750;
+    }
+    .nav-links a{
+      padding: 10px 10px;
+      border-radius: 12px;
+      transition: background .2s ease, color .2s ease;
+    }
+    .nav-links a:hover{
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 11px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-weight: 850;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, background .2s ease;
+      gap:10px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.09); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(58,142,230,0.95), rgba(131,95,255,0.95));
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .hamburger{
+      display:none;
+      width:44px; height:44px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      cursor:pointer;
+      align-items:center; justify-content:center;
+    }
+    .hamburger span{
+      width:18px; height:2px; background: rgba(255,255,255,0.85);
+      position:relative; display:block;
+    }
+    .hamburger span:before, .hamburger span:after{
+      content:""; position:absolute; left:0; width:18px; height:2px;
+      background: rgba(255,255,255,0.85);
+    }
+    .hamburger span:before{ top:-6px; }
+    .hamburger span:after{ top:6px; }
+
+    .mobile-menu{ display:none; padding-bottom: 14px; }
+    .mobile-menu a{
+      display:block;
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: var(--muted);
+      margin-top: 10px;
+      font-weight: 750;
+    }
+    .mobile-menu a:hover{ color: var(--text); background: rgba(255,255,255,0.08); }
+    .mobile-menu.show{ display:block; }
+
+    /* HERO */
+    header{ padding: 44px 0 18px; }
+    .hero{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.085), rgba(255,255,255,0.045));
+      box-shadow: var(--shadow);
+      padding: 30px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset:-45%;
+      background:
+        radial-gradient(420px 320px at 20% 20%, rgba(58,142,230,0.22), transparent 62%),
+        radial-gradient(520px 380px at 72% 30%, rgba(131,95,255,0.20), transparent 62%);
+      transform: rotate(-6deg);
+      pointer-events:none;
+    }
+    .hero > *{ position:relative; z-index:2; }
+
+    .kicker{
+      display:inline-flex; align-items:center; gap:10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-weight: 800;
+      width: fit-content;
+    }
+    .dot{
+      width:9px; height:9px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      box-shadow: 0 0 0 6px rgba(131,95,255,0.12);
+    }
+    h1{
+      margin: 14px 0 10px;
+      font-size: clamp(32px, 4vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -0.8px;
+      max-width: 18ch;
+    }
+    .sub{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 16.5px;
+      line-height: 1.6;
+      max-width: 68ch;
+    }
+    .hero-actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top: 8px;
+    }
+    .mini{
+      margin-top: 14px;
+      color: var(--muted2);
+      font-size: 13px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .chip{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* SECTIONS */
+    section{ padding: 34px 0; }
+    .section-head{ margin-bottom: 12px; }
+    .num{
+      font-size: 12px;
+      color: var(--muted2);
+      letter-spacing: 0.14em;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+    h2{
+      margin:0;
+      font-size: 24px;
+      letter-spacing:-0.35px;
+    }
+    .desc{
+      margin:8px 0 0;
+      color: var(--muted);
+      max-width: 78ch;
+      line-height: 1.55;
+    }
+
+    .card{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      padding: 16px;
+      box-shadow: 0 14px 44px rgba(0,0,0,0.20);
+    }
+
+    /* CONTACT */
+    .contact{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 10px;
+      width: fit-content;
+    }
+    .links{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    .link{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 13px;
+    }
+    .link:hover{ color: var(--text); background: rgba(255,255,255,0.08); }
+
+    footer{
+      padding: 24px 0 40px;
+      color: var(--muted2);
+      font-size: 13px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 18px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 760px){
+      .nav-links{ display:none; }
+      .hamburger{ display:flex; }
+      h1{ max-width: 22ch; }
+      section{ padding: 30px 0; }
+    }
+    @media (max-width: 520px){
+      .hero{ padding: 22px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="wrap">
+      <div class="nav-inner">
+        <a class="brand" href="index.html" aria-label="Neuron Home">
+          <div class="logo" aria-hidden="true"></div>
+          <div>Neuron</div>
+        </a>
+
+        <div class="nav-links" aria-label="Primary navigation">
+          <a href="index.html">Home</a>
+          <a href="details.html">Details</a>
+          <a href="#contact">Contact</a>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <a class="btn primary" href="#contact">Request a Pilot</a>
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation">
+        <a href="index.html">Home</a>
+        <a href="details.html">Details</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header id="top">
+    <div class="wrap">
+      <div class="hero">
+        <div class="kicker"><span class="dot"></span> Learning-first • Policy-driven • Transparent</div>
+
+        <h1>AI for programming courses—built for real learning.</h1>
+
+        <p class="sub">
+          Neuron helps instructors set clear AI expectations and gives students guided, course-aligned support—without turning the classroom into surveillance.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn primary" href="#contact">Request a pilot</a>
+          <a class="btn" href="details.html">See details</a>
+        </div>
+
+        <div class="mini">
+          <span class="chip">Instructor control</span>
+          <span class="chip">Student understanding</span>
+          <span class="chip">Privacy-first approach</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTACT (01 on Home so numbering looks normal) -->
+  <section id="contact">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="num">01</div>
+        <h2>Contact</h2>
+        <p class="desc">
+          Interested in a quick demo or a pilot conversation? Reach out—we’ll respond promptly.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="contact">
+          <div>
+            <div class="pill">Neuron Team</div>
+            <h3 style="margin:0 0 8px;">Let’s connect</h3>
+            <p style="margin:0; color: var(--muted); line-height:1.55;">
+              Email either founder. We’re happy to share a short demo and discuss fit for your course.
+            </p>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="btn primary" href="mailto:charlie.economou@gmail.com">Email Charles</a>
+            <a class="btn" href="mailto:drakeab2@illinois.edu">Email Drake</a>
+          </div>
+        </div>
+
+        <div class="links" aria-label="Founder LinkedIn links">
+          <a class="link" target="_blank" rel="noopener" href="https://www.linkedin.com/in/charles-economou">Charles on LinkedIn</a>
+          <a class="link" target="_blank" rel="noopener" href="https://www.linkedin.com/in/drake-bartolai/">Drake on LinkedIn</a>
+        </div>
+
+        <div style="margin-top:12px; color: var(--muted2); font-size: 13px;">
+          Neuron — a Ceria project.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>© <span id="year"></span> Neuron</div>
+        <div>Learning-first • Policy-driven • Transparent</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    if (hamburger && mobileMenu) {
+      hamburger.addEventListener('click', () => {
+        const isOpen = mobileMenu.classList.toggle('show');
+        hamburger.setAttribute('aria-expanded', String(isOpen));
+      });
+
+      mobileMenu.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          mobileMenu.classList.remove('show');
+          hamburger.setAttribute('aria-expanded', 'false');
+        });
+      });
+    }
+
+    // Footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>
